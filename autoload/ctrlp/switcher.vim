@@ -66,11 +66,12 @@ call add(g:ctrlp_ext_vars, {
 " Return: a Vim's List
 "
 function! ctrlp#switcher#init()
-    let l:current_dir = getcwd()
+    let l:current_dir = glob("`pwd`")
+    " getcwd()
     let l:relative_path = s:filepath
 
     if s:filepath =~ l:current_dir.'.*'
-        let l:relative_path = strpart(s:filepath, strlen(l:current_dir) + 1)
+        let l:relative_path = strpart(s:filepath, strlen(l:current_dir))
     endif
 
     return sort(
@@ -105,7 +106,7 @@ endf
 function! ctrlp#switcher#enter()
     let s:current_filename  = expand("%:p")
     let s:filepath          = expand("%:p:h")
-    let s:filename_stripped = expand("%:r")
+    let s:filename_stripped = expand("%:t:r")
 
     if s:filename_stripped =~ '_p$'
         " Ok, we are in the private class
