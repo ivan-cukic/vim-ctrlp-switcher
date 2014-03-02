@@ -77,7 +77,10 @@ function! ctrlp#switcher#init()
     return sort(
     \    filter(
     \        split(
-    \            glob("`ls -1 ".l:relative_path."/".s:filename_stripped.".*  ".l:relative_path."/".s:filename_stripped."_p.* `"),
+    \            glob("`ls -1 ".l:relative_path."/".s:filename_stripped."_p.* `"),
+    \        "\n") +
+    \        split(
+    \            glob("`ls -1 ".l:relative_path."/".s:filename_stripped.".* `"),
     \        "\n"),
     \    "'".l:current_dir."/'.v:val != '".s:current_filename."'")
     \)
