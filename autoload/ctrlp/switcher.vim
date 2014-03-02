@@ -14,6 +14,9 @@ if ( exists('g:loaded_ctrlp_switcher') && g:loaded_ctrlp_switcher )
 endif
 let g:loaded_ctrlp_switcher = 1
 
+let s:current_filename  = ''
+let s:filepath          = ''
+let s:filename_stripped = ''
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "
@@ -63,17 +66,20 @@ call add(g:ctrlp_ext_vars, {
 " Return: a Vim's List
 "
 function! ctrlp#switcher#init()
-    let l:filename = expand(%:r)
+    let l:current_dir = getcwd()
+    let l:relative_path = s:filepath
 
-    if filename =~ '_p$'
-        " Ok, we are in the private class
-        let l:filename = strpart(l:filename, 0, strlen(l:filename) - 2)
+    if s:filepath =~ l:current_dir.'.*'
+        let l:relative_path = strpart(s:filepath, strlen(l:current_dir) + 1)
     endif
 
-    let input = [
-        l:filename
-        ]
-    return input
+    return sort(
+    \    filter(
+    \        split(
+    \            glob("`ls -1 ".l:relative_path."/".s:filename_stripped."* `"),
+    \        "\n"),
+    \    "'".l:current_dir."/'.v:val != '".s:current_filename."'")
+    \)
 endfunction
 
 
@@ -84,15 +90,27 @@ endfunction
 "           the values are 'e', 'v', 't' and 'h', respectively
 "  a:str    the selected string
 "
+" function! ctrlp#switcher#accept(mode, str)
+"     " For this example, just exit ctrlp and run help
+"     call ctrlp#exit()
+"     help ctrlp-extensions
+" endfunction
+
 function! ctrlp#switcher#accept(mode, str)
-    " For this example, just exit ctrlp and run help
-    call ctrlp#exit()
-    help ctrlp-extensions
-endfunction
+    call ctrlp#acceptfile(a:mode, a:str)
+endf
 
 
 " (optional) Do something before enterting ctrlp
 function! ctrlp#switcher#enter()
+    let s:current_filename  = expand("%:p")
+    let s:filepath          = expand("%:p:h")
+    let s:filename_stripped = expand("%:r")
+
+    if s:filename_stripped =~ '_p$'
+        " Ok, we are in the private class
+        let s:filename_stripped = strpart(s:filename_stripped, 0, strlen(s:filename_stripped) - 2)
+    endif
 endfunction
 
 
@@ -113,12 +131,5 @@ let s:id = g:ctrlp_builtins + len(g:ctrlp_ext_vars)
 function! ctrlp#switcher#id()
   return s:id
 endfunction
-
-
-" Create a command to directly call the new search type
-"
-" Put this in vimrc or plugin/switcher.vim
-" command! CtrlPSwitch call ctrlp#init(ctrlp#switcher#id())
-
 
 " vim:nofen:fdl=0:ts=4:sw=4:sts=4
