@@ -14,9 +14,7 @@ if ( exists('g:loaded_ctrlp_switcher') && g:loaded_ctrlp_switcher )
 endif
 let g:loaded_ctrlp_switcher = 1
 
-let s:current_filename  = ''
-let s:filepath          = ''
-let s:filename_stripped = ''
+let s:current_file = ''
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "
@@ -66,24 +64,29 @@ call add(g:ctrlp_ext_vars, {
 " Return: a Vim's List
 "
 function! ctrlp#switcher#init()
-    let l:current_dir = glob("`pwd`")
-    " getcwd()
-    let l:relative_path = s:filepath
+python << endpython
+import vim
+import os
+import glob
+import string
 
-    if s:filepath =~ l:current_dir.'.*'
-        let l:relative_path = strpart(s:filepath, strlen(l:current_dir))
-    endif
+current_directory = os.getcwd()
+current_file = vim.eval('s:current_file')
 
-    return sort(
-    \    filter(
-    \        split(
-    \            glob("`ls -1 ".l:relative_path."/".s:filename_stripped."_p.* `"),
-    \        "\n") +
-    \        split(
-    \            glob("`ls -1 ".l:relative_path."/".s:filename_stripped.".* `"),
-    \        "\n"),
-    \    "'".l:current_dir."/'.v:val != '".s:current_filename."'")
-    \)
+(filepath, filename) = os.path.split(current_file)
+
+filename = os.path.splitext(filename)[0]
+filename = string.rsplit(filename, '_', 1)[0]
+
+result = glob.glob(filepath + "/" + filename + "*")
+result += glob.glob(filepath + "/*_" + filename + "*")
+# result += [filepath, filename]
+
+result.remove(current_file)
+
+vim.command("return " + str(result))
+
+endpython
 endfunction
 
 
@@ -107,14 +110,7 @@ endf
 
 " (optional) Do something before enterting ctrlp
 function! ctrlp#switcher#enter()
-    let s:current_filename  = expand("%:p")
-    let s:filepath          = expand("%:p:h")
-    let s:filename_stripped = expand("%:t:r")
-
-    if s:filename_stripped =~ '_p$'
-        " Ok, we are in the private class
-        let s:filename_stripped = strpart(s:filename_stripped, 0, strlen(s:filename_stripped) - 2)
-    endif
+    let s:current_file  = expand("%:p")
 endfunction
 
 
