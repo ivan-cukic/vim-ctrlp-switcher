@@ -8,7 +8,7 @@ the d-ptr pattern.
 Essentially, it lists the files whose names start with the root of
 the current file.
 
-It is inspired by Derek's fswitch plugin (https://github.com/derekwyatt/vim-fswitch)
+It is inspired by Derek Wyatt's fswitch plugin (https://github.com/derekwyatt/vim-fswitch)
 but a little bit more powerful.
 
 Example
