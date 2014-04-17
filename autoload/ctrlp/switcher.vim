@@ -115,6 +115,16 @@ except:
 if project_sources == "":
     project_sources = current_path
 
+current_file = os.path.realpath(current_file)
+current_path = os.path.realpath(current_path)
+project_sources = os.path.realpath(project_sources)
+
+if not current_path.endswith("/"):
+    current_path += "/"
+
+if not project_sources.endswith("/"):
+    project_sources += "/"
+
 if work_mode == 1:
     # Switching between the files with the same name
     # (with a few exceptions like _p and similar)
