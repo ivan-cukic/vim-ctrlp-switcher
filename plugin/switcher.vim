@@ -4,6 +4,7 @@
 " Author: Ivan Cukic <ivan.cukic___kde.org>
 " License: The MIT License
 
-" command! -nargs=? CtrlPSwitch call ctrlp#switcher#switcher(<q-args>)
-command! CtrlPSwitch call ctrlp#init(ctrlp#switcher#id())
+command! CtrlPSwitch        call ctrlp#init(ctrlp#switcher#id())
+command! CtrlPSwitchBasic   let g:ctrlpswitcher_mode_override=1 | call ctrlp#init(ctrlp#switcher#id())
+command! CtrlPSwitchFull    let g:ctrlpswitcher_mode_override=2 | call ctrlp#init(ctrlp#switcher#id())
 

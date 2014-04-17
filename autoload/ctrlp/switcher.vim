@@ -1,6 +1,6 @@
 " =============================================================================
 " File:          autoload/ctrlp/switcher.vim
-" Description:   Switching between related header / impl files
+" Description:   Switching between related files
 " =============================================================================
 
 " To load this extension into ctrlp, add this to your vimrc:
@@ -103,6 +103,14 @@ try:
 except:
     pass
 
+try:
+    work_mode_override = int(vim.eval('g:ctrlpswitcher_mode_override'))
+    if work_mode_override > 0:
+        vim.command('let g:ctrlpswitcher_mode_override=0')
+        work_mode = work_mode_override
+except:
+    pass
+
 current_file = vim.eval('s:current_file')
 current_path = vim.eval('s:current_path')
 
@@ -130,8 +138,10 @@ if work_mode == 1:
     # (with a few exceptions like _p and similar)
 
     (filepath, filename) = os.path.split(current_file)
+
     filename = os.path.splitext(filename)[0]
     filename = string.rsplit(filename, '_', 1)[0]
+
     result = glob.glob(filepath + "/" + filename + "*")
     result += glob.glob(filepath + "/*_" + filename + "*")
 
