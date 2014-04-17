@@ -15,6 +15,35 @@ endif
 let g:loaded_ctrlp_switcher = 1
 
 let s:current_file = ''
+let s:current_path = ''
+
+python << endpython
+
+import vim
+import os
+import glob
+import string
+import re
+import subprocess
+from itertools import chain,groupby
+
+ctrlpswitcher_underscorer1 = re.compile(r'(.)([A-Z][a-z]+)')
+ctrlpswitcher_underscorer2 = re.compile('([a-z0-9])([A-Z])')
+
+def ctrlpswitcher_separate_words(s):
+    subbed = ctrlpswitcher_underscorer1.sub(r'\1_\2', s)
+    return filter(None, ctrlpswitcher_underscorer2.sub(r'\1_\2', subbed).split('_'))
+
+def ctrlpswitcher_flatten(items):
+    return list(chain.from_iterable(items))
+
+def ctrlpswitcher_count_occurences(words, string):
+    lowered = string.lower()
+    return len(filter(lambda word: word.lower() in lowered, words))
+
+endpython
+
+
 
 " Add this extension's settings to g:ctrlp_ext_vars
 "
@@ -65,24 +94,74 @@ call add(g:ctrlp_ext_vars, {
 "
 function! ctrlp#switcher#init()
 python << endpython
-import vim
-import os
-import glob
-import string
 
-current_directory = os.getcwd()
+result = []
+
+work_mode = 2
+try:
+    work_mode = int(vim.eval('g:ctrlpswitcher_mode'))
+except:
+    pass
+
 current_file = vim.eval('s:current_file')
+current_path = vim.eval('s:current_path')
 
-(filepath, filename) = os.path.split(current_file)
+project_sources = ""
+try:
+    project_sources = vim.eval('g:ctrlpswitcher_project_sources')
+except:
+    pass
 
-filename = os.path.splitext(filename)[0]
-filename = string.rsplit(filename, '_', 1)[0]
+if project_sources == "":
+    project_sources = current_path
 
-result = glob.glob(filepath + "/" + filename + "*")
-result += glob.glob(filepath + "/*_" + filename + "*")
-# result += [filepath, filename]
+if work_mode == 1:
+    # Switching between the files with the same name
+    # (with a few exceptions like _p and similar)
 
-result.remove(current_file)
+    (filepath, filename) = os.path.split(current_file)
+    filename = os.path.splitext(filename)[0]
+    filename = string.rsplit(filename, '_', 1)[0]
+    result = glob.glob(filepath + "/" + filename + "*")
+    result += glob.glob(filepath + "/*_" + filename + "*")
+
+else:
+    # Switching between the files that are similarly
+    # named to the current one
+
+    # result += [project_sources]
+    # result += [current_path]
+
+    current_file_len = len(current_file)
+
+    (filepath, filename) = os.path.split(current_file)
+
+    filename = os.path.splitext(filename)[0]
+    filename = string.rsplit(filename, '_', 1)[0]
+
+    words = ctrlpswitcher_separate_words(filename)
+
+    # result += [filename + " " + str(words)]
+
+    arguments = ctrlpswitcher_flatten( [ ["-o", "-iname", "*"+ word +"*"] for word in words ] )
+    arguments.pop(0)
+    arguments = ['find', project_sources, '-type', 'f', '('] + arguments + [')', '!', '-name', '.*']
+
+    # result += [str(arguments)]
+
+    files = subprocess.check_output(arguments).split('\n')
+    files.sort(key = lambda item: abs(len(item) - current_file_len))
+
+    result += files
+
+try:
+    result.remove(current_file)
+except:
+    pass
+
+current_path_len = len(current_path)
+result = [ item[current_path_len:] if item.startswith(current_path) else item for item in result ]
+result = filter(None, result)
 
 vim.command("return " + str(result))
 
@@ -111,6 +190,7 @@ endf
 " (optional) Do something before enterting ctrlp
 function! ctrlp#switcher#enter()
     let s:current_file  = expand("%:p")
+    let s:current_path  = glob("`pwd`")
 endfunction
 
 
