@@ -85,3 +85,4 @@ willing to work on them:
 
 - Make it obey wildignore when listing the files
 - Make a similarity-based sort of the results
+- Optimize full mode with some sort of cache
