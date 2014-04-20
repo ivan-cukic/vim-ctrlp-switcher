@@ -77,9 +77,9 @@ endpython
 call add(g:ctrlp_ext_vars, {
     \ 'init': 'ctrlp#switcher#init()',
     \ 'accept': 'ctrlp#switcher#accept',
-    \ 'lname': 'long statusline name',
-    \ 'sname': 'shortname',
-    \ 'type': 'line',
+    \ 'lname': 'file switcher',
+    \ 'sname': 'switcher',
+    \ 'type': 'path',
     \ 'enter': 'ctrlp#switcher#enter()',
     \ 'exit': 'ctrlp#switcher#exit()',
     \ 'opts': 'ctrlp#switcher#opts()',
