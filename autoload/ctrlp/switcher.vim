@@ -41,6 +41,9 @@ def ctrlpswitcher_count_occurences(words, string):
     lowered = string.lower()
     return len(filter(lambda word: word.lower() in lowered, words))
 
+def ctrlpswitcher_get_vim_variable(variable, default_value):
+    return vim.eval('exists(\'' + variable + '\') ? ' + variable + ' : ' + default_value)
+
 endpython
 
 
@@ -97,28 +100,17 @@ python << endpython
 
 result = []
 
-work_mode = 2
-try:
-    work_mode = int(vim.eval('g:ctrlpswitcher_mode'))
-except:
-    pass
+work_mode = int(ctrlpswitcher_get_vim_variable('g:ctrlpswitcher_mode', '2'))
+work_mode_override = int(ctrlpswitcher_get_vim_variable('g:ctrlpswitcher_mode_override', '0'))
 
-try:
-    work_mode_override = int(vim.eval('g:ctrlpswitcher_mode_override'))
-    if work_mode_override > 0:
-        vim.command('let g:ctrlpswitcher_mode_override=0')
-        work_mode = work_mode_override
-except:
-    pass
+if work_mode_override > 0:
+    vim.command('let g:ctrlpswitcher_mode_override=0')
+    work_mode = work_mode_override
 
 current_file = vim.eval('s:current_file')
 current_path = vim.eval('s:current_path')
 
-project_sources = ""
-try:
-    project_sources = vim.eval('g:ctrlpswitcher_project_sources')
-except:
-    pass
+project_sources = ctrlpswitcher_get_vim_variable('g:ctrlpswitcher_project_sources', '\'\'')
 
 if project_sources == "":
     project_sources = current_path
