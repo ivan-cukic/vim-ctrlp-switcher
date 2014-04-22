@@ -179,9 +179,15 @@ try:
 except:
     pass
 
+# lets try to trim the results
+current_path=os.getcwd()
+if not current_path.endswith('/'):
+    current_path += '/'
+
 current_path_len = len(current_path)
 result = [ item[current_path_len:] if item.startswith(current_path) else item for item in result ]
 result = filter(None, result)
+#
 
 vim.command("return " + str(result))
 
