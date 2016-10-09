@@ -17,7 +17,7 @@ let g:loaded_ctrlp_switcher = 1
 let s:current_file = ''
 let s:current_path = ''
 
-python << endpython
+py3 << endpython
 
 import vim
 import os
@@ -96,7 +96,7 @@ call add(g:ctrlp_ext_vars, {
 " Return: a Vim's List
 "
 function! ctrlp#switcher#init()
-python << endpython
+py3 << endpython
 
 result = []
 
@@ -132,7 +132,7 @@ if work_mode == 1:
     (filepath, filename) = os.path.split(current_file)
 
     filename = os.path.splitext(filename)[0]
-    filename = string.rsplit(filename, '_', 1)[0]
+    filename = filename.rsplit('_', 1)[0]
 
     result = glob.glob(filepath + "/" + filename + "*")
     result += glob.glob(filepath + "/*_" + filename + "*")
@@ -149,7 +149,7 @@ else:
     (filepath, filename) = os.path.split(current_file)
 
     filename = os.path.splitext(filename)[0]
-    filename = string.rsplit(filename, '_', 1)[0]
+    filename = filename.rsplit('_', 1)[0]
 
     words = ctrlpswitcher_separate_words(filename)
 
@@ -178,7 +178,7 @@ if not current_path.endswith('/'):
 
 current_path_len = len(current_path)
 result = [ item[current_path_len:] if item.startswith(current_path) else item for item in result ]
-result = filter(None, result)
+# result = filter(None, result)
 #
 
 vim.command("return " + str(result))
