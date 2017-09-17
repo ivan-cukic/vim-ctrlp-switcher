@@ -161,7 +161,9 @@ else:
 
     # result += [str(arguments)]
 
-    files = subprocess.check_output(arguments).split('\n')
+    output = subprocess.check_output(arguments).decode("utf-8")
+    files = list(filter(None, output.split('\n')))
+
     files.sort(key = lambda item: abs(len(item) - current_file_len))
 
     result += files
